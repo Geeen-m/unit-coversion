@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="description" content="アメリカの単位を日本の単位に変換。cm↔in、kg↔lb、°C↔°Fなど">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="単位変換">
+    <meta name="apple-mobile-web-app-icons" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%232563eb' width='180' height='180'/><text x='90' y='125' font-size='90' text-anchor='middle' fill='white'>📏</text></svg>">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%232563eb' width='100' height='100' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white'>📏</text></svg>">
+    <title>単位変換 - 快速ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --bg-light: #ffffff;
+            --bg-light-secondary: #f8fafc;
+            --text-light: #1e293b;
+            --text-light-secondary: #64748b;
+            --border-light: #e2e8f0;
+            --bg-dark: #0f172a;
+            --bg-dark-secondary: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-dark-secondary: #cbd5e1;
+            --border-dark: #334155;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-light: var(--bg-dark);
+                --bg-light-secondary: var(--bg-dark-secondary);
+                --text-light: var(--text-dark);
+                --text-light-secondary: var(--text-dark-secondary);
+                --border-light: var(--border-dark);
+            }
+        }
+
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
+            overflow-x: hidden;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-light-secondary);
+        }
+
+        /* ホーム画面 */
+        #home {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #home.hidden {
+            display: none;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-light-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 12px;
+            margin-bottom: 8px;
+        }
+
+        .popular-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .preset-card-large {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+        }
+
+        .preset-card-large:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        .preset-emoji-large {
+            font-size: 40px;
+        }
+
+        .preset-text {
+            flex: 1;
+        }
+
+        .preset-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .preset-units {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+
+        .arrow-icon {
+            font-size: 20px;
+            opacity: 0.7;
+        }
+
+        .other-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .preset-card-small {
+            background: var(--bg-light-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .preset-card-small:active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .preset-emoji-small {
+            font-size: 24px;
+        }
+
+        .preset-title-small {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .preset-units-small {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* コンバーター画面 */
+        .converter-section {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .converter-section.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .converter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-light-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-button:active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .converter-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* 横並び入力・結果 */
+        .dual-converter {
+            background: var(--bg-light-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr 40px 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid var(--border-light);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .field-input-wrapper {
+                background: var(--bg-dark);
+            }
+        }
+
+        input[type="number"] {
+            flex: 1;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            outline: none;
+            font-variant-numeric: tabular-nums;
+        }
+
+        input[type="number"]::placeholder {
+            color: var(--text-light-secondary);
+        }
+
+        .unit-tag {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .swap-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .swap-button:active {
+            transform: scale(0.9) rotate(180deg);
+        }
+
+        /* クイックプリセット */
+        .quick-section {
+            margin-top: 8px;
+        }
+
+        .quick-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-light-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .quick-presets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .quick-preset {
+            padding: 10px 8px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-light);
+        }
+
+        .quick-preset:active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* 結果表示 */
+        .result-display {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 28px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .result-unit {
+            font-size: 11px;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        /* レスポンシブ */
+        @media (prefers-color-scheme: dark) {
+            .field-input-wrapper {
+                border-color: var(--border-dark);
+            }
+
+            .quick-preset {
+                background: var(--bg-light-secondary);
+                border-color: var(--border-light);
+                color: var(--text-light);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ホーム画面 -->
+        <div id="home">
+            <header>
+                <div class="title">単位変換</div>
+                <div class="subtitle">よく使う単位をスピード変換</div>
+            </header>
+
+            <div class="popular-cards">
+                <div class="preset-card-large" onclick="openConverter('height')">
+                    <div class="preset-emoji-large">📏</div>
+                    <div class="preset-text">
+                        <div class="preset-title">身長・長さ</div>
+                        <div class="preset-units">cm ↔ in</div>
+                    </div>
+                    <div class="arrow-icon">→</div>
+                </div>
+
+                <div class="preset-card-large" onclick="openConverter('weight')">
+                    <div class="preset-emoji-large">⚖️</div>
+                    <div class="preset-text">
+                        <div class="preset-title">体重</div>
+                        <div class="preset-units">kg ↔ lb</div>
+                    </div>
+                    <div class="arrow-icon">→</div>
+                </div>
+
+                <div class="preset-card-large" onclick="openConverter('temperature')">
+                    <div class="preset-emoji-large">🌡️</div>
+                    <div class="preset-text">
+                        <div class="preset-title">気温</div>
+                        <div class="preset-units">°C ↔ °F</div>
+                    </div>
+                    <div class="arrow-icon">→</div>
+                </div>
+            </div>
+
+            <div class="section-label">その他の単位</div>
+            <div class="other-cards">
+                <div class="preset-card-small" onclick="openConverter('distance')">
+                    <div class="preset-emoji-small">🛣️</div>
+                    <div class="preset-title-small">距離</div>
+                    <div class="preset-units-small">km ↔ mi</div>
+                </div>
+
+                <div class="preset-card-small" onclick="openConverter('weight-oz')">
+                    <div class="preset-emoji-small">⚖️</div>
+                    <div class="preset-title-small">グラム</div>
+                    <div class="preset-units-small">g ↔ oz</div>
+                </div>
+
+                <div class="preset-card-small" onclick="openConverter('volume')">
+                    <div class="preset-emoji-small">💧</div>
+                    <div class="preset-title-small">液体容量</div>
+                    <div class="preset-units-small">L ↔ gal</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 身長コンバーター -->
+        <div id="height" class="converter-section">
+            <div class="converter-header">
+                <div class="converter-title">📏 身長・長さ</div>
+                <button class="back-button" onclick="goHome()">←</button>
+            </div>
+
+            <div class="dual-converter">
+                <div class="input-field">
+                    <div class="field-label">cm</div>
+                    <div class="field-input-wrapper">
+                        <input type="number" id="height-left" placeholder="0" onInput="convertHeight()">
+                        <div class="unit-tag">cm</div>
+                    </div>
+                </div>
+
+                <button class="swap-button" onclick="swapHeight()">⇄</button>
+
+                <div class="result-display">
+                    <div class="result-value" id="height-right">0</div>
+                    <div class="result-unit">in</div>
+                </div>
+            </div>
+
+            <div class="quick-section">
+                <span class="quick-label">よく使う値</span>
+                <div class="quick-presets">
+                    <button class="quick-preset" onclick="setHeightValue(160)">160cm</button>
+                    <button class="quick-preset" onclick="setHeightValue(170)">170cm</button>
+                    <button class="quick-preset" onclick="setHeightValue(180)">180cm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 体重コンバーター -->
+        <div id="weight" class="converter-section">
+            <div class="converter-header">
+                <div class="converter-title">⚖️ 体重</div>
+                <button class="back-button" onclick="goHome()">←</button>
+            </div>
+
+            <div class="dual-converter">
+                <div class="input-field">
+                    <div class="field-label">kg</div>
+                    <div class="field-input-wrapper">
+                        <input type="number" id="weight-left" placeholder="0" onInput="convertWeight()">
+                        <div class="unit-tag">kg</div>
+                    </div>
+                </div>
+
+                <button class="swap-button" onclick="swapWeight()">⇄</button>
+
+                <div class="result-display">
+                    <div class="result-value" id="weight-right">0</div>
+                    <div class="result-unit">lb</div>
+                </div>
+            </div>
+
+            <div class="quick-section">
+                <span class="quick-label">よく使う値</span>
+                <div class="quick-presets">
+                    <button class="quick-preset" onclick="setWeightValue(50)">50kg</button>
+                    <button class="quick-preset" onclick="setWeightValue(65)">65kg</button>
+                    <button class="quick-preset" onclick="setWeightValue(80)">80kg</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 気温コンバーター -->
+        <div id="temperature" class="converter-section">
+            <div class="converter-header">
+                <div class="converter-title">🌡️ 気温</div>
+                <button class="back-button" onclick="goHome()">←</button>
+            </div>
+
+            <div class="dual-converter">
+                <div class="input-field">
+                    <div class="field-label">°C</div>
+                    <div class="field-input-wrapper">
+                        <input type="number" id="temp-left" placeholder="0" onInput="convertTemp()">
+                        <div class="unit-tag">°C</div>
+                    </div>
+                </div>
+
+                <button class="swap-button" onclick="swapTemp()">⇄</button>
+
+                <div class="result-display">
+                    <div class="result-value" id="temp-right">32</div>
+                    <div class="result-unit">°F</div>
+                </div>
+            </div>
+
+            <div class="quick-section">
+                <span class="quick-label">よく使う値</span>
+                <div class="quick-presets">
+                    <button class="quick-preset" onclick="setTempValue(0)">0°C</button>
+                    <button class="quick-preset" onclick="setTempValue(20)">20°C</button>
+                    <button class="quick-preset" onclick="setTempValue(37)">37°C</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 距離コンバーター -->
+        <div id="distance" class="converter-section">
+            <div class="converter-header">
+                <div class="converter-title">🛣️ 距離</div>
+                <button class="back-button" onclick="goHome()">←</button>
+            </div>
+
+            <div class="dual-converter">
+                <div class="input-field">
+                    <div class="field-label">km</div>
+                    <div class="field-input-wrapper">
+                        <input type="number" id="distance-left" placeholder="0" onInput="convertDistance()">
+                        <div class="unit-tag">km</div>
+                    </div>
+                </div>
+
+                <button class="swap-button" onclick="swapDistance()">⇄</button>
+
+                <div class="result-display">
+                    <div class="result-value" id="distance-right">0</div>
+                    <div class="result-unit">mi</div>
+                </div>
+            </div>
+
+            <div class="quick-section">
+                <span class="quick-label">よく使う値</span>
+                <div class="quick-presets">
+                    <button class="quick-preset" onclick="setDistanceValue(5)">5km</button>
+                    <button class="quick-preset" onclick="setDistanceValue(10)">10km</button>
+                    <button class="quick-preset" onclick="setDistanceValue(100)">100km</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- グラム↔オンスコンバーター -->
+        <div id="weight-oz" class="converter-section">
+            <div class="converter-header">
+                <div class="converter-title">⚖️ グラム</div>
+                <button class="back-button" onclick="goHome()">←</button>
+            </div>
+
+            <div class="dual-converter">
+                <div class="input-field">
+                    <div class="field-label">g</div>
+                    <div class="field-input-wrapper">
+                        <input type="number" id="oz-left" placeholder="0" onInput="convertOz()">
+                        <div class="unit-tag">g</div>
+                    </div>
+                </div>
+
+                <button class="swap-button" onclick="swapOz()">⇄</button>
+
+                <div class="result-display">
+                    <div class="result-value" id="oz-right">0</div>
+                    <div class="result-unit">oz</div>
+                </div>
+            </div>
+
+            <div class="quick-section">
+                <span class="quick-label">よく使う値</span>
+                <div class="quick-presets">
+                    <button class="quick-preset" onclick="setOzValue(100)">100g</button>
+                    <button class="quick-preset" onclick="setOzValue(250)">250g</button>
+                    <button class="quick-preset" onclick="setOzValue(500)">500g</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 液体容量コンバーター -->
+        <div id="volume" class="converter-section">
+            <div class="converter-header">
+                <div class="converter-title">💧 液体容量</div>
+                <button class="back-button" onclick="goHome()">←</button>
+            </div>
+
+            <div class="dual-converter">
+                <div class="input-field">
+                    <div class="field-label">L</div>
+                    <div class="field-input-wrapper">
+                        <input type="number" id="volume-left" placeholder="0" onInput="convertVolume()">
+                        <div class="unit-tag">L</div>
+                    </div>
+                </div>
+
+                <button class="swap-button" onclick="swapVolume()">⇄</button>
+
+                <div class="result-display">
+                    <div class="result-value" id="volume-right">0</div>
+                    <div class="result-unit">gal</div>
+                </div>
+            </div>
+
+            <div class="quick-section">
+                <span class="quick-label">よく使う値</span>
+                <div class="quick-presets">
+                    <button class="quick-preset" onclick="setVolumeValue(10)">10L</button>
+                    <button class="quick-preset" onclick="setVolumeValue(50)">50L</button>
+                    <button class="quick-preset" onclick="setVolumeValue(100)">100L</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker登録（PWA対応）
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(registration => {
+                console.log('Service Worker登録成功:', registration);
+            }).catch(error => {
+                console.log('Service Worker登録失敗:', error);
+            });
+        }
+
+        // localStorage管理
+        const storage = {
+            save: (key, value) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (e) {
+                    console.log('localStorage保存失敗:', e);
+                }
+            },
+            load: (key, defaultValue = null) => {
+                try {
+                    const value = localStorage.getItem(key);
+                    return value ? JSON.parse(value) : defaultValue;
+                } catch (e) {
+                    console.log('localStorage読み込み失敗:', e);
+                    return defaultValue;
+                }
+            }
+        };
+
+        let unitStates = {
+            height: { reversed: false, leftUnit: 'cm', rightUnit: 'in' },
+            weight: { reversed: false, leftUnit: 'kg', rightUnit: 'lb' },
+            temperature: { reversed: false, leftUnit: '°C', rightUnit: '°F' },
+            distance: { reversed: false, leftUnit: 'km', rightUnit: 'mi' },
+            oz: { reversed: false, leftUnit: 'g', rightUnit: 'oz' },
+            volume: { reversed: false, leftUnit: 'L', rightUnit: 'gal' }
+        };
+
+        // コンバーター状態の保存
+        function saveConverterState(type) {
+            const getState = {
+                height: () => ({ value: document.getElementById('height-left').value, reversed: unitStates.height.reversed }),
+                weight: () => ({ value: document.getElementById('weight-left').value, reversed: unitStates.weight.reversed }),
+                temperature: () => ({ value: document.getElementById('temp-left').value, reversed: unitStates.temperature.reversed }),
+                distance: () => ({ value: document.getElementById('distance-left').value, reversed: unitStates.distance.reversed }),
+                'weight-oz': () => ({ value: document.getElementById('oz-left').value, reversed: unitStates.oz.reversed }),
+                volume: () => ({ value: document.getElementById('volume-left').value, reversed: unitStates.volume.reversed })
+            };
+            if (getState[type]) storage.save(`converter-${type}`, getState[type]());
+        }
+
+        // コンバーター状態の復元
+        function restoreConverterState(type) {
+            const saved = storage.load(`converter-${type}`);
+            if (!saved) return;
+
+            const actions = {
+                height: () => {
+                    document.getElementById('height-left').value = saved.value;
+                    if (saved.reversed !== unitStates.height.reversed) swapHeight();
+                    convertHeight();
+                },
+                weight: () => {
+                    document.getElementById('weight-left').value = saved.value;
+                    if (saved.reversed !== unitStates.weight.reversed) swapWeight();
+                    convertWeight();
+                },
+                temperature: () => {
+                    document.getElementById('temp-left').value = saved.value;
+                    if (saved.reversed !== unitStates.temperature.reversed) swapTemp();
+                    convertTemp();
+                },
+                distance: () => {
+                    document.getElementById('distance-left').value = saved.value;
+                    if (saved.reversed !== unitStates.distance.reversed) swapDistance();
+                    convertDistance();
+                },
+                'weight-oz': () => {
+                    document.getElementById('oz-left').value = saved.value;
+                    if (saved.reversed !== unitStates.oz.reversed) swapOz();
+                    convertOz();
+                },
+                volume: () => {
+                    document.getElementById('volume-left').value = saved.value;
+                    if (saved.reversed !== unitStates.volume.reversed) swapVolume();
+                    convertVolume();
+                }
+            };
+            if (actions[type]) actions[type]();
+        }
+
+        function openConverter(type) {
+            document.getElementById('home').classList.add('hidden');
+            document.querySelectorAll('.converter-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(type).classList.add('active');
+            restoreConverterState(type);
+        }
+
+        function goHome() {
+            document.getElementById('home').classList.remove('hidden');
+            document.querySelectorAll('.converter-section').forEach(el => el.classList.remove('active'));
+        }
+
+        // 身長
+        function convertHeight() {
+            const state = unitStates.height;
+            const left = parseFloat(document.getElementById('height-left').value) || 0;
+            const right = state.reversed ? (left * 2.54).toFixed(1) : (left / 2.54).toFixed(1);
+            document.getElementById('height-right').textContent = parseFloat(right) === parseInt(right) ? parseInt(right) : right;
+        }
+
+        function swapHeight() {
+            const state = unitStates.height;
+            state.reversed = !state.reversed;
+            const left = document.getElementById('height-left');
+            const right = document.getElementById('height-right');
+            [state.leftUnit, state.rightUnit] = [state.rightUnit, state.leftUnit];
+            document.querySelector('#height .field-label').textContent = state.leftUnit;
+            document.querySelector('#height .unit-tag').textContent = state.leftUnit;
+            document.querySelectorAll('#height .result-unit')[0].textContent = state.rightUnit;
+            left.value = '';
+            right.textContent = '0';
+        }
+
+        function setHeightValue(val) {
+            document.getElementById('height-left').value = val;
+            convertHeight();
+        }
+
+        // 体重
+        function convertWeight() {
+            const state = unitStates.weight;
+            const left = parseFloat(document.getElementById('weight-left').value) || 0;
+            const right = state.reversed ? (left / 2.20462).toFixed(1) : (left * 2.20462).toFixed(1);
+            document.getElementById('weight-right').textContent = parseFloat(right) === parseInt(right) ? parseInt(right) : right;
+        }
+
+        function swapWeight() {
+            const state = unitStates.weight;
+            state.reversed = !state.reversed;
+            const left = document.getElementById('weight-left');
+            const right = document.getElementById('weight-right');
+            [state.leftUnit, state.rightUnit] = [state.rightUnit, state.leftUnit];
+            document.querySelectorAll('#weight .field-label')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#weight .unit-tag')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#weight .result-unit')[0].textContent = state.rightUnit;
+            left.value = '';
+            right.textContent = '0';
+        }
+
+        function setWeightValue(val) {
+            document.getElementById('weight-left').value = val;
+            convertWeight();
+        }
+
+        // 気温
+        function convertTemp() {
+            const state = unitStates.temperature;
+            const left = parseFloat(document.getElementById('temp-left').value) || 0;
+            let right;
+            if (state.reversed) {
+                right = ((left - 32) * 5/9).toFixed(1);
+            } else {
+                right = (left * 9/5 + 32).toFixed(1);
+            }
+            document.getElementById('temp-right').textContent = parseFloat(right) === parseInt(right) ? parseInt(right) : right;
+        }
+
+        function swapTemp() {
+            const state = unitStates.temperature;
+            state.reversed = !state.reversed;
+            const left = document.getElementById('temp-left');
+            const right = document.getElementById('temp-right');
+            [state.leftUnit, state.rightUnit] = [state.rightUnit, state.leftUnit];
+            document.querySelectorAll('#temperature .field-label')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#temperature .unit-tag')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#temperature .result-unit')[0].textContent = state.rightUnit;
+            left.value = '';
+            right.textContent = '32';
+        }
+
+        function setTempValue(val) {
+            document.getElementById('temp-left').value = val;
+            convertTemp();
+        }
+
+        // 距離
+        function convertDistance() {
+            const state = unitStates.distance;
+            const left = parseFloat(document.getElementById('distance-left').value) || 0;
+            const right = state.reversed ? (left * 1.60934).toFixed(1) : (left / 1.60934).toFixed(1);
+            document.getElementById('distance-right').textContent = parseFloat(right) === parseInt(right) ? parseInt(right) : right;
+        }
+
+        function swapDistance() {
+            const state = unitStates.distance;
+            state.reversed = !state.reversed;
+            const left = document.getElementById('distance-left');
+            const right = document.getElementById('distance-right');
+            [state.leftUnit, state.rightUnit] = [state.rightUnit, state.leftUnit];
+            document.querySelectorAll('#distance .field-label')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#distance .unit-tag')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#distance .result-unit')[0].textContent = state.rightUnit;
+            left.value = '';
+            right.textContent = '0';
+        }
+
+        function setDistanceValue(val) {
+            document.getElementById('distance-left').value = val;
+            convertDistance();
+        }
+
+        // グラム↔オンス
+        function convertOz() {
+            const state = unitStates.oz;
+            const left = parseFloat(document.getElementById('oz-left').value) || 0;
+            const right = state.reversed ? (left * 28.3495).toFixed(0) : (left / 28.3495).toFixed(2);
+            document.getElementById('oz-right').textContent = parseFloat(right) === parseInt(right) ? parseInt(right) : right;
+        }
+
+        function swapOz() {
+            const state = unitStates.oz;
+            state.reversed = !state.reversed;
+            const left = document.getElementById('oz-left');
+            const right = document.getElementById('oz-right');
+            [state.leftUnit, state.rightUnit] = [state.rightUnit, state.leftUnit];
+            document.querySelectorAll('#weight-oz .field-label')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#weight-oz .unit-tag')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#weight-oz .result-unit')[0].textContent = state.rightUnit;
+            left.value = '';
+            right.textContent = '0';
+        }
+
+        function setOzValue(val) {
+            document.getElementById('oz-left').value = val;
+            convertOz();
+        }
+
+        // 液体容量
+        function convertVolume() {
+            const state = unitStates.volume;
+            const left = parseFloat(document.getElementById('volume-left').value) || 0;
+            const right = state.reversed ? (left * 3.78541).toFixed(1) : (left / 3.78541).toFixed(2);
+            document.getElementById('volume-right').textContent = parseFloat(right) === parseInt(right) ? parseInt(right) : right;
+        }
+
+        function swapVolume() {
+            const state = unitStates.volume;
+            state.reversed = !state.reversed;
+            const left = document.getElementById('volume-left');
+            const right = document.getElementById('volume-right');
+            [state.leftUnit, state.rightUnit] = [state.rightUnit, state.leftUnit];
+            document.querySelectorAll('#volume .field-label')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#volume .unit-tag')[0].textContent = state.leftUnit;
+            document.querySelectorAll('#volume .result-unit')[0].textContent = state.rightUnit;
+            left.value = '';
+            right.textContent = '0';
+        }
+
+        function setVolumeValue(val) {
+            document.getElementById('volume-left').value = val;
+            convertVolume();
+        }
+
+        // 自動保存の設定
+        document.addEventListener('input', (e) => {
+            if (e.target.type === 'number') {
+                const id = e.target.id;
+                if (id === 'height-left') saveConverterState('height');
+                else if (id === 'weight-left') saveConverterState('weight');
+                else if (id === 'temp-left') saveConverterState('temperature');
+                else if (id === 'distance-left') saveConverterState('distance');
+                else if (id === 'oz-left') saveConverterState('weight-oz');
+                else if (id === 'volume-left') saveConverterState('volume');
+            }
+        }, true);
+
+        // スワイプボタンクリック時に保存
+        document.querySelectorAll('.swap-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const section = btn.closest('.converter-section');
+                    if (section) saveConverterState(section.id);
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
