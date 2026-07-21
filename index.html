@@ -276,16 +276,15 @@
             font-weight: 700;
         }
 
-        /* 横並び入力・結果 */
+        /* 縦配置の入力・結果 */
         .dual-converter {
             background: var(--bg-light-secondary);
             border: 1px solid var(--border-light);
             border-radius: 12px;
             padding: 12px;
-            display: grid;
-            grid-template-columns: 1fr 36px 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 10px;
-            align-items: center;
             flex-shrink: 0;
         }
 
@@ -293,6 +292,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            flex-shrink: 0;
         }
 
         .field-label {
@@ -347,16 +347,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             background: var(--primary);
             border: none;
             border-radius: 8px;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.2s;
+            align-self: center;
             flex-shrink: 0;
+            margin: 4px 0;
         }
 
         .swap-button:active {
@@ -407,25 +409,26 @@
         /* 結果表示 */
         .result-display {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 10px;
+            padding: 14px 12px;
             color: white;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 4px;
             text-align: center;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
         }
 
         .result-value {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
-            line-height: 1.2;
+            line-height: 1;
         }
 
         .result-unit {
-            font-size: 10px;
+            font-size: 12px;
             opacity: 0.9;
             font-weight: 600;
         }
